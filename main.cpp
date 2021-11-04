@@ -1,34 +1,29 @@
 #include <algorithm>
-#include <execution>
-#include <fstream>
 #include <iostream>
-#include <memory>
-#include <numeric>
-#include <stack>
 #include <string>
 #include <utility>
 #include <vector>
+
 class MagicSquare {
 	std::vector<std::vector<int>> m_s{};
 	size_t m_size{};
 public:
-	static int magicSqCounter;
 	MagicSquare() {
-		//std::cout << "MagicSquare() : " << ++magicSqCounter << std::endl;
 	}
 	MagicSquare(size_t size) :m_size(size) {
 		m_s = std::vector<std::vector<int>>(size, std::vector<int>(size, -1));
-		//std::cout << "MagicSquare(size_t size) :m_size(size) : " << ++magicSqCounter << std::endl;
-	};
+	}
 	MagicSquare(MagicSquare&& s) noexcept :
 		m_s(std::move(s.m_s)),
 		m_size(std::exchange(s.m_size, 0))
-	{
-		//std::cout << "MagicSquare(MagicSquare&& s) : " << ++magicSqCounter << std::endl;
-	};
+	{}
 	MagicSquare(std::vector<std::vector<int>>& s) :m_s(s) {
+		for (auto row : s) {
+			if (row.size() != s.size()) {
+				throw std::exception("[BAD INPUT] Sides are not equal.");
+			}
+		}
 		m_size = m_s.size();
-		//std::cout << "MagicSquare(std::vector<std::vector<int>>& s) :m_s(s) : " << ++magicSqCounter << std::endl;
 	}
 	int getValue(size_t i, size_t j) {
 		return m_s[i][j];
@@ -48,7 +43,6 @@ public:
 				}
 				t += m_s[i][j];
 			}
-			//std::cout << std::endl;
 		}
 		return t;
 	}
@@ -65,13 +59,10 @@ public:
 		}
 		m_s = std::move(temp.m_s);
 	}
-
 	void flip() {
 		std::reverse(m_s.begin(), m_s.end());
 	}
-
 	~MagicSquare() {
-		//std::cout << "~MagicSquare() : " << --magicSqCounter << std::endl;
 	}
 	MagicSquare& operator=(MagicSquare&& s1) noexcept {
 		if (this == &s1) {
@@ -82,7 +73,6 @@ public:
 		return *this;
 	}
 };
-int MagicSquare::magicSqCounter = 0;
 
 MagicSquare operator-(MagicSquare& lhs, MagicSquare& rhs) {
 	MagicSquare result(lhs.getSize());
@@ -94,10 +84,6 @@ MagicSquare operator-(MagicSquare& lhs, MagicSquare& rhs) {
 		}
 	}
 	return result;
-}
-
-void printVal(int* v) {
-	std::cout << *v << " ";
 }
 
 int findMinDiff(MagicSquare& sqMagic, MagicSquare& sample) {
@@ -117,10 +103,6 @@ int findMinDiff(MagicSquare& sqMagic, MagicSquare& sample) {
 }
 
 int main() {
-	std::vector<std::vector<int>> sTest{
-		{ 0, 1, 2 },
-		{ 3, 4, 5 },
-		{ 6, 7, 8 } };
 	std::vector<std::vector<int>> sMagic{
 		{ 4, 9, 2 },
 		{ 3, 5, 7 },
@@ -133,11 +115,24 @@ int main() {
 		{ 4, 8, 2 },
 		{ 4, 5, 7 },
 		{ 6, 1, 6 } };
+	std::vector<std::vector<int>> sMagic4{
+		{  6,  3, 10, 15 },
+		{  9, 16,  5,  4 },
+		{  7,  2, 11, 14 },
+		{ 12, 13,  8,  1 }
+	};
+	std::vector<std::vector<int>> sSample4{
+		{  6,  3, 10, 14 },
+		{  9, 16,  5,  6 },
+		{  7,  2, 11, 11 },
+		{ 12, 3,  8,  1 }
+	};
 
 
-	MagicSquare sqMagic(sMagic);
-	MagicSquare sqSample2(sSample2);
-	int result{ findMinDiff(sqMagic, sqSample2) };
+	MagicSquare sqMagic4(sMagic4);
+	MagicSquare sqSample4(sSample4);
+	sqSample4.rotate();
+	int result{ findMinDiff(sqMagic4, sqSample4) };
 	std::cout << result << std::endl;
 
 
